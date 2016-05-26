@@ -30,10 +30,20 @@ struct __cat<std::tuple<T...>, std::tuple<U...>> {
     typedef std::tuple<T..., U...> type;
 };
 
+template<class T, class... Ts>
+struct __index;
+
+template<class T, class... Ts>
+struct __index<T, T, Ts...> : std::integral_constant<std::size_t, 0> {};
+
+template<class T, class U, class... Ts>
+struct __index<T, U, Ts...> : std::integral_constant<std::size_t, 1 + __index<T, Ts...>::value> {};
+
 }  // namespace v1
 }  // namespace mxbuilder
 
 using mxbuilder::__cat;
+using mxbuilder::__index;
 
 using required_tag = std::true_type;
 using optional_tag = std::false_type;
@@ -160,7 +170,7 @@ struct __storage_traits<C, T, optional_tag> {
 };
 
 template<class B, class R, class... C>
-struct state_common : public C::template setter<state_common<B, R, C...>, C>... {
+struct state_common : public C::template setter<state_common<B, R, C...>>... {
     B& builder;
 
     constexpr state_common(B& b) noexcept : builder(b) {}

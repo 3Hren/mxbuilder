@@ -8,7 +8,7 @@ struct pattern_component {
     using tag = required_tag;
     using type = std::string;
 
-    template<class Parent, class T>
+    template<class Parent>
     struct setter {
         auto pattern(type v) {
             pattern_component::validate(v);
@@ -25,7 +25,7 @@ struct severity_component {
     using tag = required_tag;
     using type = int;
 
-    template<class Parent, class T>
+    template<class Parent>
     struct setter {
         auto severity(type v) {
             return static_cast<Parent*>(this)->template set<severity_component>(std::move(v));
@@ -37,7 +37,7 @@ struct timestamp_component {
     using tag = optional_tag;
     using type = long long;
 
-    template<class Parent, class T>
+    template<class Parent>
     struct setter {
         auto timestamp(type v) {
             return static_cast<Parent*>(this)->template set<timestamp_component>(std::move(v));
