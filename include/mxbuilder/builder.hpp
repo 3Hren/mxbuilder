@@ -2,7 +2,6 @@
 
 #include <tuple>
 #include <type_traits>
-#include <ostream>
 #include <experimental/tuple>
 #include <experimental/optional>
 
@@ -178,7 +177,7 @@ struct state<B, R, std::tuple<C...>, complete_tag> :
     using state_common<B, R, C...>::state_common;
 
     auto build() && -> R {
-        return std::apply([&](auto... pack) {
+        return std::apply([&](auto&&... pack) {
             return this->builder.complete(std::forward<decltype(pack)>(pack)...);
         }, this->builder.args());
     }
