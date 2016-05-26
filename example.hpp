@@ -46,6 +46,7 @@ struct timestamp_component {
 };
 
 struct logger_t {
+    virtual ~logger_t() = default;
     virtual auto name() -> std::string = 0;
 };
 

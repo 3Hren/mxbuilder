@@ -6,7 +6,7 @@
 #include <experimental/tuple>
 #include <experimental/optional>
 
-#define __mxbuilder_static_check
+#define mxbuilder_static_check
 
 namespace std {
 
@@ -33,7 +33,7 @@ struct __cat<std::tuple<T...>, std::tuple<U...>> {
 }  // namespace v1
 }  // namespace mxbuilder
 
-using namespace mxbuilder;
+using mxbuilder::__cat;
 
 using required_tag = std::true_type;
 using optional_tag = std::false_type;
@@ -64,7 +64,7 @@ struct is_complete<std::tuple<Args...>> {
 template<class B, class R, class ComponentTuple, class = typename is_complete<ComponentTuple>::type>
 struct state;
 
-#ifdef __mxbuilder_static_check
+#ifdef mxbuilder_static_check
 
 static_assert(all_optional<std::tuple<>>::value);
 static_assert(all_optional<std::tuple<optional_tag>>::value);
@@ -205,8 +205,8 @@ public:
     typedef std::tuple<typename __storage_traits<C>::storage_type...> storage_type;
 
 private:
-    template<class, class, class, class> friend class state;
-    template<class, class, class...> friend class state_common;
+    template<class, class, class, class> friend struct state;
+    template<class, class, class...> friend struct state_common;
 
     storage_type storage;
 
@@ -214,6 +214,8 @@ public:
     constexpr builder() noexcept :
         state<builder<R, C...>, R, std::tuple<C...>>{*this}
     {}
+
+    virtual ~builder() = default;
 
 private:
     virtual auto complete(typename __storage_traits<C>::arg_type... args) -> result_type = 0;
