@@ -100,17 +100,6 @@ static_assert(contains<bool, std::tuple<bool, int>>::value);
 static_assert(contains<bool, std::tuple<int, bool>>::value);
 static_assert(!contains<bool, std::tuple<>>::value);
 
-template<class... T>
-struct unique {
-    // for each T, check T... - T not contains T.
-};
-
-// static_assert(unique<bool, std::tuple<>>::value);
-// static_assert(unique<bool, std::tuple<bool>>::value);
-// static_assert(unique<bool, std::tuple<bool, int>>::value);
-// static_assert(!unique<bool, std::tuple<bool, bool>>::value);
-
-
 template<template<typename> class F, class Sequence>
 struct filter;
 
