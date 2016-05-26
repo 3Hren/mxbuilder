@@ -50,9 +50,16 @@ struct logger_t {
     virtual auto name() -> std::string = 0;
 };
 
+struct builder_t;
+
+template<>
+struct builder_traits<builder_t> {
+    using result_type = std::unique_ptr<logger_t>;
+};
+
 struct builder_t :
     public builder<
-        std::unique_ptr<logger_t>,
+        builder_t,
         pattern_component,
         severity_component,
         timestamp_component

@@ -15,8 +15,12 @@ using std::experimental::optional;
 }  // namespace std
 
 /// Forwards.
-template<class R, class... C>
+template<class D, class... C>
 struct builder;
+
+///
+template<class T>
+struct builder_traits;
 
 namespace mxbuilder {
 inline namespace v1 {
@@ -190,15 +194,17 @@ struct state<B, R, std::tuple<C...>, incomplete_tag> :
     using state_common<B, R, C...>::state_common;
 };
 
-/// \tparam R builder result type.
+template<class D>
+using result = typename builder_traits<D>::result_type;
+
+/// \tparam D derived type of concrete builder.
 /// \tparam Component component variadic pack.
-template<class R, class... C>
+template<class D, class... C>
 struct builder :
-    public state<builder<R, C...>, R, std::tuple<C...>>
+    public state<builder<D, C...>, typename builder_traits<D>::result_type, std::tuple<C...>>
 {
 public:
-    // TODO: Check C... are unique.
-    typedef R result_type;
+    typedef typename builder_traits<D>::result_type result_type;
     typedef std::tuple<typename __storage_traits<C>::arg_type...> tuple_type;
     typedef std::tuple<typename __storage_traits<C>::storage_type...> storage_type;
 
@@ -210,7 +216,7 @@ private:
 
 public:
     constexpr builder() noexcept :
-        state<builder<R, C...>, R, std::tuple<C...>>{*this}
+        state<builder<D, C...>, result_type, std::tuple<C...>>{*this}
     {}
 
     virtual ~builder() = default;
