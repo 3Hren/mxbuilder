@@ -42,11 +42,20 @@ struct __index<T, T, Ts...> : std::integral_constant<std::size_t, 0> {};
 template<class T, class U, class... Ts>
 struct __index<T, U, Ts...> : std::integral_constant<std::size_t, 1 + __index<T, Ts...>::value> {};
 
+template<class Tuple, template<typename> class F>
+struct __transform;
+
+template<template<typename> class F, typename... Args>
+struct __transform<std::tuple<Args...>, F>{
+    typedef std::tuple<typename F<Args>::type...> type;
+};
+
 }  // namespace v1
 }  // namespace mxbuilder
 
 using mxbuilder::__cat;
 using mxbuilder::__index;
+using mxbuilder::__transform;
 
 using required_tag = std::true_type;
 using optional_tag = std::false_type;
@@ -183,7 +192,7 @@ struct state<B, R, std::tuple<C...>, complete_tag> :
     auto build() && -> R {
         return std::apply([&](auto&&... pack) {
             return this->builder.complete(std::forward<decltype(pack)>(pack)...);
-        }, this->builder.args());
+        }, this->builder.unpack_storage());
     }
 };
 
@@ -194,19 +203,44 @@ struct state<B, R, std::tuple<C...>, incomplete_tag> :
     using state_common<B, R, C...>::state_common;
 };
 
-template<class D>
-using result = typename builder_traits<D>::result_type;
+/// \tparam T must satisfy Component concept.
+template<class T>
+struct extract_arg {
+    typedef typename __storage_traits<T>::arg_type type;
+};
+
+/// \tparam T must satisfy Component concept.
+template<class T>
+struct extract_storage {
+    typedef typename __storage_traits<T>::storage_type type;
+};
+
+template<class D, class Tuple = typename __transform<typename builder_traits<D>::component_tuple, extract_arg>::type>
+struct completer;
+
+template<class D, class... T>
+struct completer<D, std::tuple<T...>> {
+private:
+    typedef typename builder_traits<D>::result_type result_type;
+
+public:
+    virtual ~completer() = default;
+
+    virtual auto complete(T... args) -> result_type = 0;
+};
 
 /// \tparam D derived type of concrete builder.
 /// \tparam Component component variadic pack.
 template<class D, class... C>
 struct builder :
-    public state<builder<D, C...>, typename builder_traits<D>::result_type, std::tuple<C...>>
+    public state<builder<D, C...>, typename builder_traits<D>::result_type, std::tuple<C...>>,
+    private completer<D>
 {
 public:
     typedef typename builder_traits<D>::result_type result_type;
-    typedef std::tuple<typename __storage_traits<C>::arg_type...> tuple_type;
-    typedef std::tuple<typename __storage_traits<C>::storage_type...> storage_type;
+    typedef typename builder_traits<D>::component_tuple component_tuple;
+    typedef typename __transform<component_tuple, extract_arg>::type tuple_type;
+    typedef typename __transform<component_tuple, extract_storage>::type storage_type;
 
 private:
     template<class, class, class, class> friend struct state;
@@ -222,9 +256,7 @@ public:
     virtual ~builder() = default;
 
 private:
-    virtual auto complete(typename __storage_traits<C>::arg_type... args) -> result_type = 0;
-
-    auto args() const -> tuple_type {
+    auto unpack_storage() const -> tuple_type {
         return std::apply([&](auto... pack) {
             return std::make_tuple(__storage_traits<C>::unpack(pack)...);
         }, storage);

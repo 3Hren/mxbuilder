@@ -55,6 +55,12 @@ struct builder_t;
 template<>
 struct builder_traits<builder_t> {
     using result_type = std::unique_ptr<logger_t>;
+
+    using component_tuple = std::tuple<
+        pattern_component,
+        severity_component,
+        timestamp_component
+    >;
 };
 
 struct builder_t :
