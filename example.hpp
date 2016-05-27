@@ -14,7 +14,7 @@ struct builder_t;
 template<>
 struct builder_traits<builder_t> {
     struct pattern_t {
-        using tag = required_tag;
+        using tag = required_tag<1>;
         using type = std::string;
 
         template<class Parent>
@@ -31,7 +31,7 @@ struct builder_traits<builder_t> {
     };
 
     struct severity_t {
-        using tag = required_tag;
+        using tag = required_tag<1>;
         using type = int;
 
         template<class Parent>
@@ -43,7 +43,7 @@ struct builder_traits<builder_t> {
     };
 
     struct timestamp_t {
-        using tag = optional_tag;
+        using tag = optional_tag<1>;
         using type = long long;
 
         template<class Parent>

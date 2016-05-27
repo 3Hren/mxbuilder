@@ -57,11 +57,20 @@ using mxbuilder::__cat;
 using mxbuilder::__index;
 using mxbuilder::__transform;
 
-using required_tag = std::true_type;
-using optional_tag = std::false_type;
+template<std::size_t N, typename = typename std::enable_if<N != 0>::type>
+using required_tag = std::tuple<std::true_type, std::integral_constant<std::size_t, N>>;
+
+template<std::size_t N>
+using optional_tag = std::tuple<std::false_type, std::integral_constant<std::size_t, N>>;
 
 using complete_tag = std::true_type;
 using incomplete_tag = std::false_type;
+
+template<class T>
+struct is_optional_tag : public std::false_type {};
+
+template<std::size_t N>
+struct is_optional_tag<optional_tag<N>> : public std::true_type {};
 
 template<class Tuple>
 struct all_optional;
@@ -69,7 +78,7 @@ struct all_optional;
 template<class... T>
 struct all_optional<std::tuple<T...>> :
     public std::conditional<
-        (... && std::is_same<T, optional_tag>::value),
+        (... && is_optional_tag<T>::value),
         std::true_type,
         std::false_type
     >::type
@@ -89,9 +98,9 @@ struct state;
 #ifdef mxbuilder_static_check
 
 static_assert(all_optional<std::tuple<>>::value);
-static_assert(all_optional<std::tuple<optional_tag>>::value);
-static_assert(all_optional<std::tuple<optional_tag, optional_tag>>::value);
-static_assert(!all_optional<std::tuple<required_tag, optional_tag>>::value);
+static_assert(all_optional<std::tuple<optional_tag<0>>>::value);
+static_assert(all_optional<std::tuple<optional_tag<1>, optional_tag<2>>>::value);
+static_assert(!all_optional<std::tuple<required_tag<1>, optional_tag<0>>>::value);
 
 #endif
 
@@ -150,8 +159,8 @@ struct switch_state {
 template<class C, class T = typename C::type, class Tag = typename C::tag>
 struct __storage_traits;
 
-template<class C, class T>
-struct __storage_traits<C, T, required_tag> {
+template<class C, class T, std::size_t Rn>
+struct __storage_traits<C, T, required_tag<Rn>> {
     typedef T arg_type;
     typedef std::optional<T> storage_type;
 
@@ -160,8 +169,8 @@ struct __storage_traits<C, T, required_tag> {
     }
 };
 
-template<class C, class T>
-struct __storage_traits<C, T, optional_tag> {
+template<class C, class T, std::size_t On>
+struct __storage_traits<C, T, optional_tag<On>> {
     typedef std::optional<T> arg_type;
     typedef std::optional<T> storage_type;
 
