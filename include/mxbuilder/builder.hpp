@@ -15,7 +15,7 @@ using std::experimental::optional;
 }  // namespace std
 
 /// Forwards.
-template<class D, class... C>
+template<class D>
 struct builder;
 
 ///
@@ -215,26 +215,16 @@ struct extract_storage {
     typedef typename __storage_traits<T>::storage_type type;
 };
 
-template<class D, class Tuple = typename __transform<typename builder_traits<D>::component_tuple, extract_arg>::type>
-struct completer;
+template<
+    class D,
+    class R = typename builder_traits<D>::result_type,
+    class C = typename builder_traits<D>::component_tuple
+>
+struct __builder_base;
 
-template<class D, class... T>
-struct completer<D, std::tuple<T...>> {
-private:
-    typedef typename builder_traits<D>::result_type result_type;
-
-public:
-    virtual ~completer() = default;
-
-    virtual auto complete(T... args) -> result_type = 0;
-};
-
-/// \tparam D derived type of concrete builder.
-/// \tparam Component component variadic pack.
-template<class D, class... C>
-struct builder :
-    public state<builder<D, C...>, typename builder_traits<D>::result_type, std::tuple<C...>>,
-    private completer<D>
+template<class D, class R, class... C>
+struct __builder_base<D, R, std::tuple<C...>> :
+    public state<__builder_base<D, R, std::tuple<C...>>, R, std::tuple<C...>>
 {
 public:
     typedef typename builder_traits<D>::result_type result_type;
@@ -249,11 +239,11 @@ private:
     storage_type storage;
 
 public:
-    constexpr builder() noexcept :
-        state<builder<D, C...>, result_type, std::tuple<C...>>{*this}
+    constexpr __builder_base() noexcept :
+        state<__builder_base<D>, result_type, std::tuple<C...>>{*this}
     {}
 
-    virtual ~builder() = default;
+    virtual ~__builder_base() = default;
 
 private:
     auto unpack_storage() const -> tuple_type {
@@ -261,4 +251,12 @@ private:
             return std::make_tuple(__storage_traits<C>::unpack(pack)...);
         }, storage);
     }
+
+    virtual auto complete(typename __storage_traits<C>::arg_type... args) -> result_type = 0;
+};
+
+/// \tparam D derived type of concrete builder, which must have builder_traits<D>.
+template<class D>
+struct builder : public __builder_base<D> {
+    using __builder_base<D>::__builder_base;
 };

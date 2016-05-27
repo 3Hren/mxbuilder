@@ -64,12 +64,7 @@ struct builder_traits<builder_t> {
 };
 
 struct builder_t :
-    public builder<
-        builder_t,
-        pattern_component,
-        severity_component,
-        timestamp_component
-    >
+    public builder<builder_t>
 {
 private:
     /// \note hidden.
