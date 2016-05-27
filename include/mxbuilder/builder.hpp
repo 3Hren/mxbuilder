@@ -57,10 +57,12 @@ using mxbuilder::__cat;
 using mxbuilder::__index;
 using mxbuilder::__transform;
 
+/// \tparam N exact number of occurrences of tagged component.
 template<std::size_t N, typename = typename std::enable_if<N != 0>::type>
 using required_tag = std::tuple<std::true_type, std::integral_constant<std::size_t, N>>;
 
-template<std::size_t N>
+/// \tparam N allow number of occurrences of tagged component.
+template<std::size_t N, typename = typename std::enable_if<N != 0>::type>
 using optional_tag = std::tuple<std::false_type, std::integral_constant<std::size_t, N>>;
 
 using complete_tag = std::true_type;
@@ -98,9 +100,10 @@ struct state;
 #ifdef mxbuilder_static_check
 
 static_assert(all_optional<std::tuple<>>::value);
-static_assert(all_optional<std::tuple<optional_tag<0>>>::value);
+static_assert(all_optional<std::tuple<optional_tag<1>>>::value);
+static_assert(all_optional<std::tuple<optional_tag<1>, optional_tag<1>>>::value);
 static_assert(all_optional<std::tuple<optional_tag<1>, optional_tag<2>>>::value);
-static_assert(!all_optional<std::tuple<required_tag<1>, optional_tag<0>>>::value);
+static_assert(!all_optional<std::tuple<required_tag<1>, optional_tag<1>>>::value);
 
 #endif
 

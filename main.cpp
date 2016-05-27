@@ -4,10 +4,10 @@
 
 int main() {
     // Won't compile, because both required components weren't initialized.
-    // auto logger = builder_t()
+    // auto logger = logger_builder_t()
     //     .build();
 
-    auto logger = builder_t()
+    auto logger = logger_builder_t()
         .pattern("{}")
         .severity(42)
         .build();

@@ -9,10 +9,10 @@ struct logger_t {
     virtual auto name() -> std::string = 0;
 };
 
-struct builder_t;
+struct logger_builder_t;
 
 template<>
-struct builder_traits<builder_t> {
+struct builder_traits<logger_builder_t> {
     struct pattern_t {
         using tag = required_tag<1>;
         using type = std::string;
@@ -63,7 +63,7 @@ struct builder_traits<builder_t> {
     >;
 };
 
-struct builder_t : public builder<builder_t> {
+struct logger_builder_t : public builder<logger_builder_t> {
 private:
     /// \note hidden.
     auto complete(std::string pattern, int severity, std::optional<long long> timestamp) ->

@@ -12,7 +12,7 @@ auto operator<<(std::ostream& stream, const std::optional<T>& v) -> std::ostream
     }
 }
 
-auto builder_traits<builder_t>::pattern_t::validate(const type& v) -> void {
+auto builder_traits<logger_builder_t>::pattern_t::validate(const type& v) -> void {
     if (v.empty()) {
         throw std::invalid_argument("pattern must not be empty");
     }
@@ -32,7 +32,7 @@ struct super_logger_t : public logger_t {
     }
 };
 
-auto builder_t::complete(std::string pattern, int severity, std::optional<long long> timestamp) ->
+auto logger_builder_t::complete(std::string pattern, int severity, std::optional<long long> timestamp) ->
     std::unique_ptr<logger_t>
 {
     std::cout << "R(\"" << pattern << "\", " << severity << ", " << timestamp << ")" << std::endl;
