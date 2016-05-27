@@ -32,7 +32,7 @@ struct super_logger_t : public logger_t {
     }
 };
 
-auto logger_builder_t::complete(std::string pattern, int severity, std::optional<long long> timestamp) ->
+auto logger_builder_t::complete(std::string pattern, int severity, std::optional<long long> timestamp) && ->
     std::unique_ptr<logger_t>
 {
     std::cout << "R(\"" << pattern << "\", " << severity << ", " << timestamp << ")" << std::endl;

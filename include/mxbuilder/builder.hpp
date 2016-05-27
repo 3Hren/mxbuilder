@@ -203,7 +203,7 @@ struct state<B, R, std::tuple<C...>, complete_tag> :
 
     auto build() && -> R {
         return std::apply([&](auto&&... pack) {
-            return this->builder.complete(std::forward<decltype(pack)>(pack)...);
+            return std::move(this->builder).complete(std::forward<decltype(pack)>(pack)...);
         }, this->builder.unpack_storage());
     }
 };
@@ -264,7 +264,7 @@ private:
         }, storage);
     }
 
-    virtual auto complete(typename __storage_traits<C>::arg_type... args) -> result_type = 0;
+    virtual auto complete(typename __storage_traits<C>::arg_type... args) && -> result_type = 0;
 };
 
 /// \tparam D derived type of concrete builder, which must have builder_traits<D>.

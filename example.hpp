@@ -66,6 +66,6 @@ struct builder_traits<logger_builder_t> {
 struct logger_builder_t : public builder<logger_builder_t> {
 private:
     /// \note hidden.
-    auto complete(std::string pattern, int severity, std::optional<long long> timestamp) ->
+    auto complete(std::string pattern, int severity, std::optional<long long> timestamp) && ->
         std::unique_ptr<logger_t> override;
 };
